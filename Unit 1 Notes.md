@@ -1,0 +1,89 @@
+# Unit 1 Notes | Overview - What is an Operating System 
+---
+## Hardware
+- CPU
+- MMU
+- RAM
+- Hard Drive/SSD
+- Serial Ports (USB)
+- Graphics Processor
+- Screen
+- Keyboard
+- Mouse
+- Audio 1/o
+- Clock
+- Network
+## User Tasks
+- Start computer and make sure everything works
+   - Bootloader - I get to set up how I load
+   - Make sure all the hardware is there and working
+   - Make sure the file system is present and intact
+   - Initialize all components in the correct order
+- Manage the file system
+   - **Linux Virtual File System (VFS)** <img width="902" height="427" alt="image" src="https://github.com/user-attachments/assets/1c9d6004-351d-42bd-baa6-9155f31529b5" />
+   - How it is organized
+   - What is the structure
+   - How are permissions managed
+   - If system is hierarchical, how is the tree managed
+   - How to recover from errors
+   - Recovery
+   - Size limitations
+- Organize and allocate memory
+   - Physical memory vs. Virtual memory
+   - Hardware setup with MMU
+   - Determine correct amount of memory needed
+   - How to allocate memory to an application
+   - How to provide memory when asked by an application
+   - What to do if available memory runs out
+- Schedule jobs
+   - Who runs when
+   - When do I run
+   - What are interrupt handles
+   - How many CPUs do I have
+   - Is there threading provided
+   - How do I pause one task to allow another task to run (time slicing)
+   - How do I keep track of time
+- Load and execute applications
+   - Can anything be loaded
+   - What format is a loadable file
+   - How do I do relocatable loading and how is the application built to allow that
+   - Where do I jump to start the application running
+   - How do I track an application in the system
+   - What do I do if it misbehaves, crashes, or tries to take control of the hardware
+- Be able to utilize hardware
+   - How do I best make use of the hardware in the system
+   - How do I account for new and various versions of hardware
+   - Is this a device driver model
+   - If this is a device driver model - how does that look to the device driver?
+      - What common interface do I preent that the driver can code to?
+   - How do I allocate hardware?  
+- Protect the system and applications from each other
+   - How to secure the system
+   - What is "kernel" mode vs. "user" mode
+   - Do I use all protections provided by the hardware
+- Accept input and provide output
+   - Accept input from the user
+   - Accept input from the hardware
+   - Forms of user input
+      - Mouse
+      - Keyboard
+      - Fingerprint
+      - Camera
+      - Touch
+      - Audio
+   - Network
+   - Provide feedback to hardware
+   - Provide text display
+   - Provide graphics display
+   - Provide audio output
+   - Provide tactile output
+   - Provide network output 
+- Allow appllcations to interact with "me" and each other
+   - What system calls ((A)pplication (P)rogramming (I)nterface) do I provide
+   - How are they utilized
+   - How are they protected
+   - How else should an application interact with the OS?
+      - ***IT SHOULDN'T***
+      - The API or system calls are the only **legitimate** entry point to the kernel
+   - What inter-process communications are there?
+   - If they are protected from each other, how can they work with each other?
