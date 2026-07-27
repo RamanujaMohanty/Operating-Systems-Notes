@@ -2,6 +2,8 @@
 Notes for CSC 415 - Operating Systems
 ---
 ## Unit 01 - Overview - What is an Operating System
+- Hardware
+- User Tasks
 ## Unit 02 - Operating Systems Structure
 - Operating System Services
 - User and Operating System Interface
