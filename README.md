@@ -1,6 +1,5 @@
 # Operating-Systems-Notes
 Notes for CSC 415 - Operating Systems
----
 ## Unit 01 - Overview - What is an Operating System
 - Hardware
 - User Tasks
