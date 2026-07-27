@@ -1,0 +1,95 @@
+# Unit 12 Notes | I/O Systems
+## 12-1 - Overview
+- I/O management is a major component of operating system design and operation
+  - Important aspect of computer operation
+  - I/O devices vary greatly
+  - Various methods to control them
+  - Performance management
+  - New types of devices frequent
+- Ports, busses, device controllers connect to various devices
+- **Device drivers** encapsulate device details
+  - Present uniform device-access interface to I/O subsystem
+## 12-2 - I/O Hardware
+- Incredible variety of I/O devices
+  - Storage
+  - Transmission
+  - Human-Interface
+- Common concepts - signals from I/O devices interface with computer
+  - **Port** - connection point for device
+  - **Bus** - **daisy chain** or shared direct access
+    - **PCI** buss common in PCs and servers, PCI Express (**PCIe**)
+    - **expansion bus** connects relatively slow devices
+  - **Controller (host adapter)** - electronics that operate port, bus, device
+    - Sometimes integrated
+    - Sometimes separate circuit board (host adapter)
+    - Contains processor, microcode, private memory, bus controller, etc.
+      - Some talk to per-device controller with bus controller, microcode, memory, etc.
+      - Eg. for a SSD or hard drive, repeated writes to same sector can be prevented in the microcode to prevent wear
+- A Typical PC Bus Structure: <img width="755" height="437" alt="image" src="https://github.com/user-attachments/assets/6e63a7f6-bf00-4050-bfb5-4d6ac7f26fe7" />
+- I/O instructions control devices
+- Devices usually have registers where device driver places commands, addresses, and data to write or read date from registers after command execution
+  - Data-in register, data-out register, status register control register
+  - Typically 1-4 bytes or First In, First Out buffer
+- Devices have addresses used by:
+  - Direct I/O instructions
+  - Memory-mapped I/O
+    - Device data and command registers mapped to processor address space
+    - Especially for large address spaces (graphics)
+    - <img width="841" height="643" alt="image" src="https://github.com/user-attachments/assets/f33b4eee-aee2-4be0-897e-f52d039d4a80" />
+- Device I/O Port Locations on PCs (partial): <img width="534" height="339" alt="image" src="https://github.com/user-attachments/assets/df9b2806-4e6a-4914-96da-64012d07ece5" />
+  - Some ports (eg. diskette-drive controller) may not be used, thus being given to other I/O services to use
+- Polling
+  - For each byte of I/O
+    - (1) Read busy bit from status register until 0
+    - (2) Host sets read or write bit and if write copies data into data-out register
+    - (3) Host sets command-ready bit
+    - (4) Controller sets busy bit, executes transfer
+    - (5) Controller clears busy bit, error bit, command-ready bit when transfer done
+  - Known as **busy-wait cycle**
+    - Reasonable if device is fast
+    - Inefficient if device is slow as CPU cycles wasted
+    - Data can be overwritten/lost if CPU cycle is missed when CPU switches to other tasks
+- Interrupts
+  - Polling can happen in 3 instruction cycles
+    - Read status cycle, logical-and cycle to extract status bit, branch cycle if status bit != 0
+    - Done with bit masking
+    - 
+    ```
+    1011 0100  (Status Register)
+    0000 0100  (The Mask)
+    ---------
+    0000 0100  (The Result)
+    ```
+  - CPU interrupt-request line triggered by I/O device
+    - Checked by processor after each instruction
+  - **Interrupt handler** receives interrupts
+    - **Maskable** to ignore or delay some interrupts
+  - **Interrupt vector** to dispatch interrupt to correct handler
+    - Context switch at start and end
+    - Based on priority
+    - Some **nonmaskable**
+      - Reserved for critical and catastrophic errors that cannot be ignored
+    - Interrupt chaining if more than one devide at same interrupt number.
+  - Interrupt mechanism also used for **exceptions**
+    - Terminate process, crash system due to hardware error
+  - Page fault executes when memory access error occurs
+  - System call executes via **trap** to trigger kernel to execute requests
+  - Multi-CPU systems can process interrupts concurrently *if* operating system is designed to handle it
+  - Used for time-sensitive processing, frequent, fast
+  - **Interrupt-Driven I/O Cycle:** <img width="777" height="442" alt="image" src="https://github.com/user-attachments/assets/9245e13f-f096-41ff-93ac-b696ef1c414e" />
+  - **Intel Pentium Processor Event-Vector Table:** <img width="517" height="417" alt="image" src="https://github.com/user-attachments/assets/36999857-4cd4-4370-9923-128cc16d26dd" />
+- Direct Memory Access (DMA)
+  - Used to avoid programmed I/O for large data movement
+  - Requires DMA controller
+  - Bypasses CPU to transfer data directly between I/O device and memory
+  - OS writes DMA command block into memory
+    - Source and destination addresses
+    - Read or write mode
+    - Count of bytes
+    - Writes location of command block to DMA controller
+    - Bus mastering of DMA controller - grabs bus from CPU
+      - **Cycle stealing** from CPU but still much more efficient
+    - When done, interrupts to signal completion
+  - Version that is aware of virtual addresses can be even more efficient - **DVMA - Digital Virtual Memory Address**
+  - **Six Step Process to Perform DMA Transfer:** <img width="762" height="439" alt="image" src="https://github.com/user-attachments/assets/1a4e94d2-5759-460a-a28f-9a79c9210869" />
+## 12-3 - Application I/O  
