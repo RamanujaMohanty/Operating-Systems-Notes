@@ -92,4 +92,169 @@
     - When done, interrupts to signal completion
   - Version that is aware of virtual addresses can be even more efficient - **DVMA - Digital Virtual Memory Address**
   - **Six Step Process to Perform DMA Transfer:** <img width="762" height="439" alt="image" src="https://github.com/user-attachments/assets/1a4e94d2-5759-460a-a28f-9a79c9210869" />
-## 12-3 - Application I/O  
+## 12-3 - Application I/O
+- Application I/O Interface
+  - I/O system calls encapulate device behaviors in generic classes
+  - Device-driver layer hides differences among I/O controllers from kernel
+  - New devices talking already-implemented protocols need no extra work
+  - Each OS has its own I/O subsystem structures and device driver frameworks
+  - Devices vary in many dimensions
+    - Character-stream or block
+    - Sequential or random-access
+    - Synchronous or asynchronous (or both)
+    - Sharable or dedicated
+    - Speed of operation
+    - read-write, read only, or write only
+## 12-4 - Kernel I/O
+- A Kernel I/O Structure: <img width="638" height="349" alt="image" src="https://github.com/user-attachments/assets/7aff5c33-79f5-4f93-9bd7-5da6c566b5f9" />
+- Characteristics of I/O Devices: <img width="245" height="182" alt="image" src="https://github.com/user-attachments/assets/ae6c12e5-c5f6-4429-8348-2425e133ce3e" />
+  - Subtleties of devices handled by device drivers
+  - Broadly I/O devices can be grouped by the OS into:
+    - Block I/O
+    - Character I/O (Stream)
+    - Memory-mapped file access
+    - Network sockets
+  - For direct manipulation of I/O device specificl characteristics, usually an escape / backdoor
+    - UNIX `ioctl()` call to send arbitrary bits to a device control register and data to device data register
+- Block and Character Devices
+  - Block devices include disk drives
+    - Commands include: read, write, seek
+    - Raw I/O, direct I/O, or file-system access
+    - Memory-mapped file access possible
+      - File mapped to virtual memory and clusters brought via demand paging
+    - Direct Memory Access
+  - Character devices include keyboards, mice, serial ports
+    - Commands include `get()`, `put()`
+    - Libraries layered on top allow line editing
+- Network Devices
+  - Varying enough from block and character to have own interface
+  - Linux, UNIX, Windows and many others include **socket** interface
+    - Separated network protocol from network operation
+    - Includes `select()` functionality
+  - Approaches vary widely (pipes, FIFO, streams, queues, mailboxes)
+- Clocks and Timers
+  - Provide current time, elapsed time, timer
+  - Normal resolution about 1/60 second
+  - Some systems provide higher-resolution times
+  - **Programmable interval timer** used for timings, periodic interrupts
+  - `ioctl()` (on UNIX) covers odd aspects of I/O such as clocks and timers
+- Nonblocking and Asynchronous I/O
+  - Blocking: process suspended until I/O completed\
+    - Easy to use and understand
+    - Insufficient for some needs
+  - Nonblocking: I/O call returns as much as available
+    - User interface, data copy (buffered I/O)
+    - Implemented via multi-threading
+    - Returns quickly with count of bytes read or written
+    - `sekect()` to find if data ready then `read()` or `write()` to transfer
+  - Asynchronous: Process runs while I/O executes
+    - Difficult to use
+    - I/O subsystem signals process when I/O completed
+- Two I/O Methods: <img width="341" height="212" alt="image" src="https://github.com/user-attachments/assets/fee41b35-240c-4bad-a1ad-03ec2792394d" />
+- Vectored I/O
+  - Vectored I/O allows one system call to perform multiple I/O operations
+  - For example, UNIX `readve()` accepts a vector of multiple buffers to read into or write from
+  - This scatter-gather method better than multiple individual I/O calls
+    - Decreases context switching and system call overhead
+    - Some versions provide atomically
+      - Avoid for example wory about multiple threads changing data as reads/writes occurring
+- Kernel I/O Subsystem
+  - Scheduling
+    - Some I/O request ordering via per-device queue
+    - Some OSs try fairness
+    - Some implement quality of service (IPQOS)
+  - Buffering - store data in memory while transferring between devices
+    - To cope with device speed mismatch
+    - To cope with device transfer size mismatch
+    - To maintain "copy semantics"
+    - **Double buffering** - Two copies of the data
+      - kernel and user
+      - varying sizes
+      - full/being processed and not full/being used
+      - Copy-on-write can be used for efficiency in some cases
+  - Device-status Table: <img width="341" height="209" alt="image" src="https://github.com/user-attachments/assets/7cd27196-1de6-4fb9-86c1-05c2a5de6370" />
+  - Sun Enterprise 6000 Device-Transfer Rates: <img width="318" height="218" alt="image" src="https://github.com/user-attachments/assets/38775c12-7837-41cc-8f4c-0b75c252ca91" />
+  - Caching - faster device holding copy of data
+    - Always just a copy
+    - Key to performance
+    - Sometimes combined with buffering
+  - Spooling - hold output for a device
+    - If device can serve only one request at a time
+    - eg. Printing
+  - Device reservation - provides exclusive access to a device
+    - System calls for allocation and deallocation
+    - Watch out for deadlock
+- Error Handling
+  - OS can recover from disk read, device unavailable, transient write failures
+    - Retry a read or write for example
+    - Some systems more advanced - Solaris FMA, AIX
+      - Track error frequencies, stop using device with increasing frequency of retryable errors
+  - Most return an error number or code when I/O request fails
+  - System error logs hold problem reports
+- I/O Protection
+  - User process may accidentally or purposefully attempt to disrupt normal operation via illegal I/O instructions
+    - All I/O instructions defined to be privileged
+    - I/O must be performed via system calls
+      - Memory-mapped and I/O port memory locations must be protected too
+- Use of a System Call to Perform I/O: <img width="339" height="239" alt="image" src="https://github.com/user-attachments/assets/af63cb26-5487-4aa7-8728-9997e2a7d27b" />
+- Kernel Data Structures
+  - Kernel keeps state infor for I/O components, including open file tables, network connections, character device state
+  - Many, many complex data structures to track buffers, memory allocation, "dirty" blocks
+  - Some use object-oriented methods and message passing to implement I/O
+    - Windows uses message passing
+      - Message with I/O information passed from user mode into kernel
+      - Message modified as it flows through to device-driver and back to process
+- UNIX I/O Kernel Structure: <img width="335" height="236" alt="image" src="https://github.com/user-attachments/assets/b20c404e-ec35-4ac0-876b-b636d7aaf14a" />
+## 12-5 - Transforming I/O Requests to Hardware
+- Power Management
+  - Not strictly domain of I/O, but much is I/O related
+  - Computers and devices use electricity, generate heat, frequently require cooling
+  - OSs can help manage and improve use
+    - Cloud computing environments move virtual machines between servers
+      - Can end up evacuating whole systems and shutting them down
+  - Mobile computing has power management as first calls OS aspect
+  - For example, Android implements
+    - Component-level power management
+    - Wake locks - like other locks but prevent sleep of device when lock is held
+    - Power collapse - put a device into very deep sleep
+      - Marginal power use
+      - Only awake enough to respond to external stimuli (button press, incoming call) 
+- I/O Requests to Hardware Operations
+  - Consider reading a file from disk for a process:
+    - Determine device holding file
+    - Translate name to device representation
+    - Physically read data from disk into buffer
+    - Make data available to requesting process
+    - Return control to process
+- Life Cycle of An I/O Request: <img width="337" height="439" alt="image" src="https://github.com/user-attachments/assets/948f6ffe-a4a5-42c3-8a73-f8e542fbd136" />
+## 12-6 - STREAMS
+- STREAMS
+  - STREAM - a full-duplex communication channel between a user-level process and a device in UNIX System V and beyond
+  - STREAM consists of:
+    - STREAM head interfaces with the user process
+    - driver end interfaces with the device
+    - zero or more STREAM modules between them
+  - Each module contains a **read queue** and a **write queue**
+  - Message passing is used to communicate between cues
+    - **Flow control** option to indicate available or busy
+  - Asynchronous internally, synchronous where user process communicates with stream head
+- The STREAMS Structure: <img width="347" height="193" alt="image" src="https://github.com/user-attachments/assets/ade5507c-3ee7-4bd7-abc9-1f01394b7223" />
+## 12-7 - Performance
+- Performance
+  - I/O is a major factor in system performance;
+    - Demands CPU to execute device-driver, kernel I/O code
+    - Context switches due to interrupts
+    - Data copying
+    - Network traffic especially stressful
+- Intercomputer Communications: <img width="250" height="214" alt="image" src="https://github.com/user-attachments/assets/a69afe89-3548-44ca-be23-ad1e5622317a" />
+- Improving Performance
+  - Reduce number of context switches
+  - Reduce data copying
+  - Reduce interrupts by using large transfers, smart controllers, polling
+  - Use Direct Memory Access
+  - Use smarter hardware devices
+  - Balance CPU, memory, bus, and I/O performance for highest throughput
+  - Moce user-mode processes/daemons to kernel threads
+- Device-Functionality Progression: <img width="629" height="354" alt="image" src="https://github.com/user-attachments/assets/891bddef-3039-4cfa-bb7e-947ea4157e02" />
+---
+# END
