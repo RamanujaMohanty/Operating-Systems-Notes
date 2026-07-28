@@ -112,3 +112,42 @@
     - allow and deny user access
 - Examples of Windows and Unix System Calls: <img width="485" height="524" alt="image" src="https://github.com/user-attachments/assets/ca4ce55d-65e6-4ac5-b456-71130cac5e6c" />
 - Standard C library example with a C program invoking printf() library call, which calls write() system call: <img width="469" height="481" alt="image" src="https://github.com/user-attachments/assets/64309b31-8f56-4cf2-aead-eeb3ad7ede74" />
+- System Architecture Examples:
+   - Arduino:
+      - <img width="466" height="409" alt="image" src="https://github.com/user-attachments/assets/d6cd86e9-50cd-44bc-b7d3-d26cb0cc3c57" />
+      - Single tasking
+      - No operating system
+      - Programs (sketches) loaded via USB into **flash memory**
+      - Single memory space
+      - Boot loader loads program
+      - Program exit -> shell reloaded
+   - FreeBSD:
+      - <img width="297" height="412" alt="image" src="https://github.com/user-attachments/assets/fde90186-c98b-4f69-b800-b236e18b4b32" />
+      - UNIX variant
+      - Multitasking
+      - User login -> invoke user's shell of choice
+      - Shell executes fork() system call to create process
+         - Executes exec() system call to load program into process
+         - Shell waits for process to terminate or continues with user commands
+      - Process exits with:
+         - code 0 - no error
+         - code > 0 - error code
+---
+## 2-4 - System Services
+- System programs provide a convenient environment for program development and execution. They can be divided into:
+   - File manipulation
+   - Status information sometimes stored in a file
+   - Programming language support
+   - Program loading and execution
+   - Communications
+   - Background services
+   - Application programs
+- Most users’ view of the operation system is defined by system programs, not the actual system calls
+- Provide a convenient environment for program development and execution
+   - Some of them are simply user interfaces to system calls; others are considerably more complex
+- File management - Create, delete, copy, rename, print, dump, list, and generally manipulate files and directories
+- Status information
+   - Some ask the system for info - date, time, amount of available memory, disk space, number of users
+   - Others provide detailed performance, logging, and debugging information
+   - Typically, these programs format and print the output to the terminal or other output devices
+   - Some systems implement a registry - used to store and retrieve configuration information
