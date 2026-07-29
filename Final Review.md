@@ -1,0 +1,9 @@
+# Final Review Notes
+- Process Life Cycle
+  - Starts at 'process creation'
+  - Enters the 'ready queue'
+  - Goes to 'running state' by the scheduler
+    - Scheduler allocates CPU resources
+  - Can go to 'termination' | becomes a zombie
+  - Can go to 'waiting state' for I/O requests
+  - <img width="740" height="352" alt="image" src="https://github.com/user-attachments/assets/2b35e6e3-3a54-4c5f-84fa-14488e778580" />
